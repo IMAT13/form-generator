@@ -7,7 +7,7 @@ export default {
   install(app, library) {
     const DEFAULT_FORM_NAME = "form";
     const contexts = reactive({});
-    app.component("InfraFormGenerator", {
+    app.component("FormGenerator", {
       props: {
         name: {
           type: String,

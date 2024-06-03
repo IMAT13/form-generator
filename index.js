@@ -1,1 +1,1 @@
-export { default as infraFormGenerator } from "./plugins/form-generator";
+export { default as FormGenerator } from "./plugins/form-generator";
