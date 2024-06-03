@@ -1,0 +1,14 @@
+.formGroup-move,
+.formGroup-enter-active {
+  transition: all 0.5s ease;
+}
+
+.formGroup-enter-from,
+.formGroup-leave-to {
+  opacity: 0;
+}
+
+.formGroup-leave-active {
+  opacity: 0;
+  position: absolute;
+}
