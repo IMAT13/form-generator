@@ -1,4 +1,3 @@
-//For more information look it up :https://gitlab.partdp.ir/farashenasa/Authentication/client/auth-web/-/issues/404
 import FormGenerator from "../components/form-generator/form-generator.component.vue";
 import useReactiveComputed from "../composables/useReactiveComputed";
 import { h, reactive, onUnmounted } from "vue";
