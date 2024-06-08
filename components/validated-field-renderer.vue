@@ -1,6 +1,6 @@
 <template>
   <fieldComponent v-bind="props.input.props" v-model="fieldValue" :errorMessage="errorMessage">
-    {{ props.input.children() }}
+    {{ props.input.children }}
   </fieldComponent>
 </template>
 
