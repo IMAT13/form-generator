@@ -1,4 +1,4 @@
-import FormGenerator from "../components/form-generator/form-generator.component.vue";
+import FormGenerator from "../components/form-generator.vue";
 import useReactiveComputed from "../composables/useReactiveComputed";
 import { h, reactive, onUnmounted } from "vue";
 import { useForm } from "vee-validate";
@@ -17,10 +17,13 @@ export default {
       },
       setup(props) {
         contexts[props.name] = useForm();
+
         const clearContext = () => {
           contexts[props.name] = null;
         };
+
         onUnmounted(() => clearContext);
+
         return () =>
           h(FormGenerator, {
             ...props,
