@@ -1,135 +1,222 @@
-
 # FormGenerator Vue Plugin
 
-FormGenerator is a Vue plugin that simplifies the creation and management of forms in your Vue.js applications. It dynamically generates form fields based on a schema and provides built-in validation and event handling.
+FormGenerator is a Vue plugin that simplifies the creation and management of forms in your Vue.js applications. It dynamically generates form fields based on a schema and provides advanced validation, transition effects, and flexible component integration.
 
-## Features
+## Features ✨
 
-- Dynamic form generation from a schema.
-- Integration with `vee-validate` for form validation.
-- Support for custom components and events.
-- Reactive form state management.
+- **Dual Field Types**
+  - Validated Fields (vee-validate integration)
+  - Plain Elements (no validation)
+- **Dynamic Children Rendering**
+- **Component Transition Animations**
+- **Aggressive & Lazy Validation Modes**
+- **Scoped Style Integration**
+- **Custom Component Library Support**
+- **Reactive Schema Configuration**
 
-## Installation
+## Installation & Setup
 
-Currently, FormGenerator is not available as an npm package. However, you can use the provided codebase and add it to your project.
-
-## Usage
-
-### Add FormGenerator to app Config
-
-First, import FormGenerator and use it as a plugin in your Vue application.
+### Plugin Registration
 
 ```javascript
-import { createApp } from 'vue';
+import { createApp } from "vue";
 
-import library from './path-to-library';
-import FormGenerator from 'path-to-form-generator';
+import library from "./path-to-library";
+import FormGenerator from "path-to-form-generator";
 
 const app = createApp(App);
 
 app.use(FormGenerator, library);
 
-app.mount('#app');
+app.mount("#app");
 ```
 
-### Schema Definition
+### Component Library Example
+
+```javascript
+import { markRaw } from "vue";
+import TextField from "./components/TextField.vue";
+import CustomButton from "./components/CustomButton.vue";
+
+export default {
+  "text-field": markRaw(TextField),
+  "custom-button": markRaw(CustomButton),
+  "date-picker": markRaw(defineAsyncComponent(() => import("./components/DatePicker.vue"))),
+};
+```
+
+## Schema Definition Guide 🗂️
+
+### Basic Structure
+
+```javascript
+const formSchema = reactive({
+  fieldName: {
+    type: "validated" | "plain", // Optional (default: 'validated')
+    as: "component-name",
+    models: {
+      /* v-model mappings */
+    },
+    props: {
+      /* component props */
+    },
+    attrs: {
+      /* HTML attributes */
+    },
+    events: {
+      /* event handlers */
+    },
+    children: [
+      /* child elements */
+    ],
+    validation: {
+      /* validation rules */
+    },
+    allowRender: true, // Conditional rendering
+  },
+});
+```
+
+### Full Featured Example
 
 Define a schema to generate your form fields. Here is an example schema for a login form:
 
 ```javascript
-import { reactive, ref } from 'vue';
-
-const loginSchema = reactive({
+const userSchema = reactive({
   username: {
     as: "text-field",
     models: {
-      modelValue: ref(""),
-    },
-    attrs:{
-        // list of attributes for your input
+      modelValue: ref(""), // Required for v-model
+      otherModel: ref(null), // Additional models
     },
     props: {
       label: "Username",
       name: "username",
-      placeholder: "Enter your username",
+      placeholder: "Enter username",
     },
-    validation: {
-      standalone: false,
-      rules: {
-        required: true,
-      },
-    },
-  },
-  password: {
-    as: "text-field",
-    models: {
-      modelValue: ref(""),
-    },
-    props: {
-      type: "password",
-      label: "Password",
-      name: "password",
-      placeholder: "Enter your password",
-    },
-    validation: {
-      standalone: false,
-      rules: {
-        required: true,
-        max: 8,
-        min: 8,
-      },
-    },
-  },
-  submit: {
-    type: "plain",// it means just render it without validation
-    as: "custom-button",
-    children: ["Submit"],
-    props: {
-      type: "button",
+    attrs: {
+      "data-testid": "username-field",
     },
     events: {
-      onClick: login,
+      onBlur: handleBlur,
+    },
+    validation: {
+      rules: {
+        required: true,
+        min: 3,
+        validator: (value) => value.includes("@"),
+      },
+      mode: "aggressive", // or undefined for lazy
+      standalone: false,
+    },
+    allowRender: computed(() => featureFlags.enableUsername),
+  },
+
+  bio: {
+    type: "plain",
+    as: "rich-text-editor",
+    models: {
+      content: ref(""),
+    },
+    children: [
+      h("div", { class: "toolbar" }, [
+        /* toolbar buttons */
+      ]),
+    ],
+  },
+
+  submit: {
+    type: "plain",
+    as: "custom-button",
+    children: [h("span", { class: "icon" }, "📨"), " Submit Form"],
+    events: {
+      onClick: submitForm,
     },
   },
 });
 ```
 
-### Customization and Styling
+## Key Features 🔍
 
-FormGenerator allows you to customize the components and styles using a library of components. Define your components in the library:
+### 1. Component Resolution
 
 ```javascript
-import { defineAsyncComponent, markRaw } from "vue";
+// Direct component reference
+as: MyComponent;
 
-export default {
-  "text-field": markRaw(
-    defineAsyncComponent(() => import(`../../components/shared/text-field.component.vue`)),
-  ),
-  "custom-button": markRaw(
-    defineAsyncComponent(() => import(`../../components/shared/custom-button.component.vue`)),
-  ),
-  // ...
-};
+// Library lookup
+as: "text-field"; // Resolves to library['text-field']
+
+// HTML tags
+as: "div";
 ```
 
-### Validation
+### 2. Plain Elements
+
+```javascript
+{
+  type: 'plain',
+  as: 'custom-component',
+  children: [
+    'Button Text',
+    h(Icon, { name: 'check' })
+  ]
+}
+```
+
+- Renders without validation wrapper
+- Supports direct children's injection
+- Full event/prop passthrough
+
+### 3. Children Rendering
+
+```javascript
+// String children
+children: ["Simple Text Content"];
+
+// VNode children
+children: [h("div", { class: "wrapper" }, [h(Icon, { name: "user" })])];
+
+// Component Slot Syntax
+h(
+  MyComponent,
+  {},
+  {
+    default: () => [
+      /* slot content */
+    ],
+    footer: () => h("div", "Custom Footer"),
+  },
+);
+```
+
+### 4. Validation
 
 FormGenerator integrates with `vee-validate` to provide robust validation capabilities. Define validation rules in the schema:
 
 ```javascript
 validation: {
-  standalone: false,
-  /* mode:"aggersive" its used when you want to validate the field aggesively when anything about the field changes, like value, rules and ...*/
+  standalone: false, // Connect to parent form
+  /* mode:"aggressive" its used when you want to validate the field aggressively when anything about the field changes, like value, rules and ...*/
   rules: {
     required: true,
+    email: true,
+    custom: (value) => value === 'secret'
   },
 },
 ```
 
-### Event Handling
+- Reactive rule updates
 
-Custom events can be defined and handled within the schema:
+- Cross-field validation support
+
+- Error message templating
+
+- Custom validation events
+
+### 5. Event Handling
+
+events can be defined and handled within the schema:
 
 ```javascript
 events: {
@@ -143,10 +230,8 @@ FormGenerator is fully compatible with Vue.js. There are no known issues so far.
 
 ### Contributing
 
-We welcome contributions from the community! If you encounter any issues or have feature requests, please create an issue in the repository.
+We welcome contributions from the community! If you encounter any issues or have feature requests.
 
 ### License
 
-FormGenerator is distributed under the MIT License.
-
-Feel free to reach out if you have any questions or need further assistance.
+Feel free to reach out to me if you have any questions or need any more help.
